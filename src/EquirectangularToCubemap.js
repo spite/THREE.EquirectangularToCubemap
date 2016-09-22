@@ -2,15 +2,11 @@
 
 function EquirectangularToCubemap( renderer ) {
 
-	this.width = 1;
-	this.height = 1;
-
 	this.renderer = renderer;
 	this.scene = new THREE.Scene();
 
 	var gl = this.renderer.getContext();
 	this.maxSize = gl.getParameter( gl.MAX_CUBE_MAP_TEXTURE_SIZE )
-	console.log( this.maxSize );
 
 	this.camera = new THREE.CubeCamera( 1, 100000, 1 );
 

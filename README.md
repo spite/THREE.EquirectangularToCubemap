@@ -8,11 +8,11 @@ Here's a demo loading an equirectangular panorama and converting it to two diffe
 
 #### How to use ####
 Include script after THREE is included
-```
+```js
 <script src="EquirectangularToCubemap.js"></script>
 ```
 Define a new instance of THREE.EquirectangularToCubemap and call .convert
-```
+```js
 // create your renderer, scene, etc.
 
 renderer = new THREE.WebGLRenderer();

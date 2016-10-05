@@ -11,6 +11,14 @@ Include script after THREE is included
 ```js
 <script src="EquirectangularToCubemap.js"></script>
 ```
+or use npm to install it
+```
+npm i three.equirectangular-to-cubemap
+```
+and include it in your code with
+```js
+require('equirectangular-to-cubemap.js');
+```
 Define a new instance of THREE.EquirectangularToCubemap and call .convert
 ```js
 // create your renderer, scene, etc.

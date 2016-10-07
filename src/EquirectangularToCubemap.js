@@ -1,4 +1,14 @@
-( function() {
+;(function() {
+
+	"use strict";
+
+	var root = this
+
+	var has_require = typeof require !== 'undefined'
+
+	var THREE = root.THREE || has_require && require('three')
+	if( !THREE )
+		throw new Error( 'EquirectangularToCubemap requires three.js' )
 
 function EquirectangularToCubemap( renderer ) {
 
@@ -35,6 +45,14 @@ EquirectangularToCubemap.prototype.convert = function( source, size ) {
 
 }
 
-window.THREE.EquirectangularToCubemap = EquirectangularToCubemap;
+if( typeof exports !== 'undefined' ) {
+	if( typeof module !== 'undefined' && module.exports ) {
+		exports = module.exports = EquirectangularToCubemap
+	}
+	exports.EquirectangularToCubemap = EquirectangularToCubemap
+}
+else {
+	root.EquirectangularToCubemap = EquirectangularToCubemap
+}
 
-} )();
+}).call(this);

@@ -55,7 +55,7 @@
 			var loader = new THREE.TextureLoader();
 			loader.load( 'pano-cru·ci·form-1471040116139.jpg', function( res ) {
 
-				var equiToCube = new THREE.EquirectangularToCubemap( renderer );
+				var equiToCube = new EquirectangularToCubemap( renderer );
 
 				mesh = new THREE.Mesh(
 					new THREE.TorusKnotGeometry( 10, 3, 100, 32 ),

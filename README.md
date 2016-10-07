@@ -15,9 +15,10 @@ or use npm to install it
 ```
 npm i three.equirectangular-to-cubemap
 ```
-and include it in your code with
+and include it in your code (don't forget to require three.js)
 ```js
-require('equirectangular-to-cubemap.js');
+var THREE = require( 'three' );
+var EquirectangularToCubemap = require( 'three.equirectangular-to-cubemap' );
 ```
 Define a new instance of THREE.EquirectangularToCubemap and call .convert
 ```js
@@ -32,7 +33,7 @@ loader.load( 'equirectangular-panorama.jpg', function( res ) {
 
   // once it's loaded, create the helper and use it
   
-  var equiToCube = new THREE.EquirectangularToCubemap( renderer );
+  var equiToCube = new EquirectangularToCubemap( renderer );
   
   // convert the image, in this case it's been used as environment map
   

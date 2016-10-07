@@ -1,6 +1,6 @@
 {
   "name": "three.equirectangular-to-cubemap",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Convert an equirectangular panorama into a three.js cubemap texture",
   "main": "build/EquirectangularToCubemap.js",
   "directories": {

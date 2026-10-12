@@ -2,7 +2,7 @@
 Convert an equirectangular panorama into a cubemap texture
 
 #### 2026 update ####
-**Disclaimer:** this library is from 2016, and three.js has had this conversion built in since r106, so you might not need it anymore
+**Disclaimer:** this library is from 2016, and three.js has had this conversion built in since r106 (2019), so you might not need it anymore
 ```js
 texture.mapping = THREE.EquirectangularReflectionMapping;
 scene.background = texture;

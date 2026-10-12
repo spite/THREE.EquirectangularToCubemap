@@ -6,6 +6,23 @@ Here's a demo loading an equirectangular panorama and converting it to two diffe
 
 ![](https://raw.githubusercontent.com/spite/THREE.EquirectangularToCubemap/master/about/snapshot.jpg)
 
+#### Built into three.js ####
+three.js has had this conversion built in since r106, so you might not need this library
+```js
+texture.mapping = THREE.EquirectangularReflectionMapping;
+scene.background = texture;
+scene.environment = texture;
+
+// or, to get the cube map itself
+
+const cubemap = new THREE.WebGLCubeRenderTarget( 1024 ).fromEquirectangularTexture( renderer, texture ).texture;
+```
+With faces as tall as the panorama, the output is identical to this library's. What this library does differently:
+
+- cube maps smaller than the panorama are filtered with its mipmaps and the poles stay sharp. three.js gives you one or the other: it aliases if the panorama hasn't been rendered yet, and blurs the poles if it has
+- the type, color space, filters and mipmaps of the cube map can be overridden, three.js always copies them from the panorama
+- the size is clamped to what the GPU supports, and a panorama that hasn't loaded or an invalid size throws an error
+
 #### How to use ####
 Use npm to install it, alongside three.js
 ```
@@ -50,7 +67,7 @@ loader.load( 'equirectangular-panorama.jpg', function( res ) {
 So ```.convert( source, size, options )``` accepts a loaded texture as ``source`` and a number as ``size`` (width and height of each face of the cube map), and returns a cube texture. It throws if the texture has no image yet or if the size is not a positive number.
 ```EquirectangularToCubemap``` automatically checks for the maximum possible size for cube maps, and clamps the size provided (there seems to be a bug with Android, at least in Nexus 5 Android 6)
 
-The cube map takes its type, colour space, filters and mipmap setting from the source texture, so an HDR panorama gives an HDR cube map. ``options`` is optional, it's passed to ```THREE.WebGLCubeRenderTarget``` and overrides any of those
+The cube map takes its type, color space, filters and mipmap setting from the source texture, so an HDR panorama gives an HDR cube map. ``options`` is optional, it's passed to ```THREE.WebGLCubeRenderTarget``` and overrides any of those
 ```js
 const cubemap = equiToCube.convert( res, 1024, { type: THREE.HalfFloatType, generateMipmaps: false } );
 ```

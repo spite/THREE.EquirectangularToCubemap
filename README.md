@@ -1,13 +1,8 @@
 # THREE.EquirectangularToCubemap
 Convert an equirectangular panorama into a cubemap texture
 
-Here's a demo loading an equirectangular panorama and converting it to two different cubemaps: [Demo](https://spite.github.io/THREE.EquirectangularToCubemap/examples/index.html)
-
-
-![](https://raw.githubusercontent.com/spite/THREE.EquirectangularToCubemap/master/about/snapshot.jpg)
-
-#### Built into three.js ####
-three.js has had this conversion built in since r106, so you might not need this library
+#### 2026 update ####
+**Disclaimer:** this library is from 2016, and three.js has had this conversion built in since r106, so you might not need it anymore
 ```js
 texture.mapping = THREE.EquirectangularReflectionMapping;
 scene.background = texture;
@@ -17,11 +12,22 @@ scene.environment = texture;
 
 const cubemap = new THREE.WebGLCubeRenderTarget( 1024 ).fromEquirectangularTexture( renderer, texture ).texture;
 ```
-With faces as tall as the panorama, the output is identical to this library's. What this library does differently:
+The library has been rewritten for current three.js. What changed from the 2016 version:
+
+- it's an ES module, and it needs three.js r152 or later and WebGL 2
+- the cube map is no longer mirrored
+- cube maps can be disposed, and HDR panoramas keep their range
+
+With faces as tall as the panorama, the output is identical to the one built into three.js. What this library does differently:
 
 - cube maps smaller than the panorama are filtered with its mipmaps and the poles stay sharp. three.js gives you one or the other: it aliases if the panorama hasn't been rendered yet, and blurs the poles if it has
 - the type, color space, filters and mipmaps of the cube map can be overridden, three.js always copies them from the panorama
 - the size is clamped to what the GPU supports, and a panorama that hasn't loaded or an invalid size throws an error
+
+Here's a demo loading an equirectangular panorama and converting it to two different cubemaps: [Demo](https://spite.github.io/THREE.EquirectangularToCubemap/examples/index.html)
+
+
+![](https://raw.githubusercontent.com/spite/THREE.EquirectangularToCubemap/master/about/snapshot.jpg)
 
 #### How to use ####
 Use npm to install it, alongside three.js

@@ -1,54 +1,68 @@
 # THREE.EquirectangularToCubemap
 Convert an equirectangular panorama into a cubemap texture
 
-Here's a demo loading an equirectangular panorama and converting it to two different cubemaps: [Demo](http://clicktorelease.com/tools/EquirectangularToCubemap/index.html)
+Here's a demo loading an equirectangular panorama and converting it to two different cubemaps: [Demo](https://spite.github.io/THREE.EquirectangularToCubemap/examples/index.html)
 
 
 ![](https://raw.githubusercontent.com/spite/THREE.EquirectangularToCubemap/master/about/snapshot.jpg)
 
 #### How to use ####
-Include script after THREE is included
+Use npm to install it, alongside three.js
+```
+npm i three three.equirectangular-to-cubemap
+```
+and import it in your code
 ```js
-<script src="EquirectangularToCubemap.js"></script>
+import * as THREE from 'three';
+import { EquirectangularToCubemap } from 'three.equirectangular-to-cubemap';
 ```
-or use npm to install it
-```
-npm i three.equirectangular-to-cubemap
-```
-and include it in your code (don't forget to require three.js)
-```js
-var THREE = require( 'three' );
-var EquirectangularToCubemap = require( 'three.equirectangular-to-cubemap' );
-```
-Define a new instance of THREE.EquirectangularToCubemap and call .convert
+It's a plain ES module, so it also works without a bundler as long as an import map resolves `three` (see [examples/index.html](examples/index.html)).
+
+Define a new instance of `EquirectangularToCubemap` and call `.convert()`
 ```js
 // create your renderer, scene, etc.
 
-renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer();
 
 // load the image you want to convert
 
-var loader = new THREE.TextureLoader();
+const loader = new THREE.TextureLoader();
 loader.load( 'equirectangular-panorama.jpg', function( res ) {
 
+  res.colorSpace = THREE.SRGBColorSpace;
+
   // once it's loaded, create the helper and use it
-  
-  var equiToCube = new EquirectangularToCubemap( renderer );
-  
+
+  const equiToCube = new EquirectangularToCubemap( renderer );
+
   // convert the image, in this case it's been used as environment map
-  
-  mesh = new THREE.Mesh(
+
+  const mesh = new THREE.Mesh(
     new THREE.TorusKnotGeometry( 10, 3, 100, 32 ),
     new THREE.MeshBasicMaterial( { envMap: equiToCube.convert( res, 1024 ) } )
   );
   scene.add( mesh );
-	
+
 } );
 
 ```
 
-So ```.convert()``` accepts a texture as ``source`` and a number (power of two) as size (with and height) of the cube map.
-```THREE.EquirectangularToCubemap``` automatically checks for the maximum possible size for cube maps, and clamps the size provided (there seems to be a bug with Android, at least in Nexus 5 Android 6)
+So ```.convert( source, size, options )``` accepts a loaded texture as ``source`` and a number as ``size`` (width and height of each face of the cube map), and returns a cube texture. It throws if the texture has no image yet or if the size is not a positive number.
+```EquirectangularToCubemap``` automatically checks for the maximum possible size for cube maps, and clamps the size provided (there seems to be a bug with Android, at least in Nexus 5 Android 6)
+
+The cube map takes its type, colour space, filters and mipmap setting from the source texture, so an HDR panorama gives an HDR cube map. ``options`` is optional, it's passed to ```THREE.WebGLCubeRenderTarget``` and overrides any of those
+```js
+const cubemap = equiToCube.convert( res, 1024, { type: THREE.HalfFloatType, generateMipmaps: false } );
+```
+
+Every cube map holds GPU memory until it's disposed. Dispose the helper too once there's nothing left to convert
+```js
+cubemap.dispose();
+equiToCube.dispose();
+```
+
+#### Requirements ####
+three.js r152 or later, and WebGL 2. For three.js r116 and earlier use version 1.x of this library.
 
 #### License ####
 

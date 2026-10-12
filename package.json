@@ -2,12 +2,20 @@
   "name": "three.equirectangular-to-cubemap",
   "version": "1.1.0",
   "description": "Convert an equirectangular panorama into a three.js cubemap texture",
-  "main": "build/EquirectangularToCubemap.js",
+  "type": "module",
+  "main": "src/EquirectangularToCubemap.js",
+  "exports": "./src/EquirectangularToCubemap.js",
+  "files": [
+    "src"
+  ],
   "directories": {
     "example": "examples"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "peerDependencies": {
+    "three": ">=0.152.0"
   },
   "repository": {
     "type": "git",

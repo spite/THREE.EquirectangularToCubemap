@@ -16,29 +16,33 @@
 </head>
 <body>
 
-	<script src="js/three.min.js"></script>
-	<script src="js/OrbitControls.js"></script>
-	<script src="js/EquirectangularToCubemap.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+			}
+		}
+	</script>
 
-	<script>
+	<script type="module">
 
-		var container;
-		var camera, scene, renderer;
-		var mesh, mesh2, sphere;
-		var controls;
+		import * as THREE from 'three';
+		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+		import { EquirectangularToCubemap } from '../src/EquirectangularToCubemap.js';
 
-		window.addEventListener( 'load', function() {
-			init();
-			animate();
-		});
+		let camera, scene, renderer;
+		let controls;
+
+		init();
+		animate();
 
 		function init() {
 
-			container = document.createElement( 'div' );
+			const container = document.createElement( 'div' );
 			document.body.appendChild( container );
 
 			camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
-			camera.rotation.x = Math.PI;
 			camera.position.set( 0, 0, 50 );
 
 			scene = new THREE.Scene();
@@ -47,33 +51,32 @@
 			renderer.setClearColor( 0xf0f0f0 );
 			renderer.setPixelRatio( window.devicePixelRatio );
 			renderer.setSize( window.innerWidth, window.innerHeight );
-			container.appendChild(renderer.domElement);
+			container.appendChild( renderer.domElement );
 
-			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			controls = new OrbitControls( camera, renderer.domElement );
 			controls.enableZoom = false;
 
-			var loader = new THREE.TextureLoader();
+			const loader = new THREE.TextureLoader();
 			loader.load( 'pano-cru·ci·form-1471040116139.jpg', function( res ) {
 
-				var equiToCube = new EquirectangularToCubemap( renderer );
+				res.colorSpace = THREE.SRGBColorSpace;
 
-				mesh = new THREE.Mesh(
+				const equiToCube = new EquirectangularToCubemap( renderer );
+				const cubemap = equiToCube.convert( res, 2048 );
+
+				const mesh = new THREE.Mesh(
 					new THREE.TorusKnotGeometry( 10, 3, 100, 32 ),
 					new THREE.MeshBasicMaterial( { envMap: equiToCube.convert( res, 8 ) } )
 				);
 				scene.add( mesh );
 
-				mesh2 = new THREE.Mesh(
-					new THREE.IcosahedronGeometry( 10, 3 ),
-					new THREE.MeshBasicMaterial( { envMap: equiToCube.convert( res, 2048 ) } )
+				const mesh2 = new THREE.Mesh(
+					new THREE.IcosahedronGeometry( 10, 7 ),
+					new THREE.MeshBasicMaterial( { envMap: cubemap } )
 				);
 				scene.add( mesh2 );
 
-				sphere = new THREE.Mesh(
-					new THREE.IcosahedronGeometry( 100, 5 ),
-					new THREE.MeshBasicMaterial( { map: res, side: THREE.BackSide, depthWrite: false } )
-				);
-				scene.add( sphere );
+				scene.background = cubemap;
 
 			} );
 
@@ -91,19 +94,11 @@
 
 		}
 
-
 		function animate() {
 
 			requestAnimationFrame( animate );
 
 			controls.update();
-			render();
-
-		}
-
-		function render() {
-
-			if( sphere ) sphere.position.copy( camera.position );
 			renderer.render( scene, camera );
 
 		}

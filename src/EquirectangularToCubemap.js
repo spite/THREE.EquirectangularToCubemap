@@ -1,58 +1,121 @@
-;(function() {
+import {
+	BackSide,
+	BoxGeometry,
+	CubeCamera,
+	LinearFilter,
+	Mesh,
+	NoBlending,
+	ShaderMaterial,
+	WebGLCubeRenderTarget
+} from 'three';
 
-	"use strict";
+const vertexShader = /* glsl */`
 
-	var root = this
+	varying vec3 vDirection;
 
-	var has_require = typeof require !== 'undefined'
+	void main() {
 
-	var THREE = root.THREE || has_require && require('three')
-	if( !THREE )
-		throw new Error( 'EquirectangularToCubemap requires three.js' )
+		vDirection = position;
+		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 
-function EquirectangularToCubemap( renderer ) {
-
-	this.renderer = renderer;
-	this.scene = new THREE.Scene();
-
-	var gl = this.renderer.getContext();
-	this.maxSize = gl.getParameter( gl.MAX_CUBE_MAP_TEXTURE_SIZE )
-
-	this.camera = new THREE.CubeCamera( 1, 100000, 1 );
-
-	this.material = new THREE.MeshBasicMaterial( {
-		map: null,
-		side: THREE.BackSide
-	} );
-
-	this.mesh = new THREE.Mesh(
-		new THREE.IcosahedronGeometry( 100, 4 ),
-		this.material
-	);
-	this.scene.add( this.mesh );
-
-}
-
-EquirectangularToCubemap.prototype.convert = function( source, size ) {
-
-	var mapSize = Math.min( size, this.maxSize );
-	this.camera = new THREE.CubeCamera( 1, 100000, mapSize );
-	this.material.map = source;
-
-	this.camera.updateCubeMap( this.renderer, this.scene );
-
-	return this.camera.renderTarget.texture;
-
-}
-
-if( typeof exports !== 'undefined' ) {
-	if( typeof module !== 'undefined' && module.exports ) {
-		exports = module.exports = EquirectangularToCubemap
 	}
-	exports.EquirectangularToCubemap = EquirectangularToCubemap
-}
-else {
-	root.EquirectangularToCubemap = EquirectangularToCubemap
+
+`;
+
+const fragmentShader = /* glsl */`
+
+	uniform highp sampler2D map;
+
+	varying vec3 vDirection;
+
+	const float PI = 3.141592653589793;
+
+	void main() {
+
+		vec3 direction = normalize( vDirection );
+
+		vec2 uv = vec2(
+			atan( direction.z, direction.x ) / ( 2.0 * PI ) + 0.5,
+			asin( clamp( direction.y, - 1.0, 1.0 ) ) / PI + 0.5
+		);
+
+		// explicit LOD from the angular footprint, implicit derivatives break at the seam and the poles
+		float texels = max( length( dFdx( direction ) ), length( dFdy( direction ) ) ) * float( textureSize( map, 0 ).y ) / PI;
+
+		gl_FragColor = textureLod( map, uv, log2( texels ) );
+
+	}
+
+`;
+
+class EquirectangularToCubemap {
+
+	constructor( renderer ) {
+
+		this.renderer = renderer;
+		this.maxSize = renderer.capabilities.maxCubemapSize;
+
+		this.material = new ShaderMaterial( {
+			uniforms: { map: { value: null } },
+			vertexShader,
+			fragmentShader,
+			side: BackSide,
+			blending: NoBlending,
+			depthTest: false,
+			depthWrite: false,
+			toneMapped: false
+		} );
+
+		this.mesh = new Mesh( new BoxGeometry( 5, 5, 5 ), this.material );
+
+	}
+
+	convert( source, size, options = {} ) {
+
+		const image = source.image;
+
+		if ( ! image || ( image.videoHeight || image.displayHeight || image.height ) === 0 ) {
+
+			throw new Error( 'EquirectangularToCubemap: the source texture has no image data yet, call convert() once it has loaded' );
+
+		}
+
+		if ( ! ( size >= 1 ) ) {
+
+			throw new RangeError( 'EquirectangularToCubemap: size must be a positive number, got ' + size );
+
+		}
+
+		const renderTarget = new WebGLCubeRenderTarget( Math.min( Math.floor( size ), this.maxSize ), {
+			type: source.type,
+			colorSpace: source.colorSpace,
+			generateMipmaps: source.generateMipmaps,
+			// a mipmap filter on a target without mipmaps samples as black
+			minFilter: source.generateMipmaps ? source.minFilter : LinearFilter,
+			magFilter: source.magFilter,
+			depthBuffer: false,
+			...options
+		} );
+
+		this.material.uniforms.map.value = source;
+		new CubeCamera( 1, 10, renderTarget ).update( this.renderer, this.mesh );
+		this.material.uniforms.map.value = null;
+
+		// disposing the returned texture releases its render target
+		const texture = renderTarget.texture;
+		texture.addEventListener( 'dispose', () => renderTarget.dispose() );
+
+		return texture;
+
+	}
+
+	dispose() {
+
+		this.mesh.geometry.dispose();
+		this.material.dispose();
+
+	}
+
 }
 
-}).call(this);
+export { EquirectangularToCubemap };

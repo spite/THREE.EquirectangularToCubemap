@@ -1,6 +1,9 @@
 # THREE.EquirectangularToCubemap
 Convert an equirectangular panorama into a cubemap texture
 
+#### Demo ####
+- **[Panorama converted to two cubemaps](https://spite.github.io/THREE.EquirectangularToCubemap/examples/index.html)**: a sharp one for the background and a sphere, a tiny one for the torus knot
+
 #### 2026 update ####
 **Disclaimer:** this library is from 2016, and three.js has had this conversion built in since r106 (2019), so you might not need it anymore
 ```js
@@ -23,9 +26,6 @@ With faces as tall as the panorama, the output is identical to the one built int
 - cube maps smaller than the panorama are filtered with its mipmaps and the poles stay sharp. three.js gives you one or the other: it aliases if the panorama hasn't been rendered yet, and blurs the poles if it has
 - the type, color space, filters and mipmaps of the cube map can be overridden, three.js always copies them from the panorama
 - the size is clamped to what the GPU supports, and a panorama that hasn't loaded or an invalid size throws an error
-
-Here's a demo loading an equirectangular panorama and converting it to two different cubemaps: [Demo](https://spite.github.io/THREE.EquirectangularToCubemap/examples/index.html)
-
 
 ![](https://raw.githubusercontent.com/spite/THREE.EquirectangularToCubemap/master/about/snapshot.jpg)
 

@@ -1,6 +1,8 @@
 # THREE.EquirectangularToCubemap
 Convert an equirectangular panorama into a cubemap texture
 
+[![npm](https://img.shields.io/npm/v/three.equirectangular-to-cubemap.svg)](https://www.npmjs.com/package/three.equirectangular-to-cubemap)
+
 #### Demo ####
 - **[Panorama converted to two cubemaps](https://spite.github.io/THREE.EquirectangularToCubemap/examples/index.html)**: a sharp one for the background and a sphere, a tiny one for the torus knot
 
